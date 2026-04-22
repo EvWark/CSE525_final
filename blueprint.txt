@@ -1,0 +1,24 @@
+C++ file runs
+initalses LCD screen with score counter
+should say 
+SCORE: on line 1
+#int on line 2
+waits for start button on breadboard to be pushed
+randomly selects number 1-5, this corrisponds to different pinout
+stores to array
+pushesh out to light/GPIO pin to turn on LED
+waits for user to press corisponding button on breadboard
+need input from that buttom to pi
+checks to see if their input is correct
+if correct run behavior again
+if incorrect flash you fail on LCD 
+flash lights on board 
+promts in terminal for user to put their name
+pushesh to website with name and score
+
+settings to configure with website:
+LED light timing 
+scaling of random pattern?
+other game modes?
+
+we could also record EEG headset data? display average sustained consentration score?

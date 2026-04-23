@@ -12,10 +12,10 @@
 // =====================
 // GPIO CONFIG
 // =====================
-#define START_BUTTON 25
+#define START_BUTTON 5
 
-int buttonPins[5] = {2, 3, 4, 5, 6};
-int ledPins[5]    = {1, 7, 10, 11, 21};
+int buttonPins[5] = {0, 3, 13, 16, 4};
+int ledPins[5]    = {7, 2, 12, 15, 1};
 
 // =====================
 // I2C LCD CONFIG

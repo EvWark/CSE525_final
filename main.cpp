@@ -58,10 +58,6 @@ void lcdCmd(int cmd) {
     lcdSend(cmd, 0);
 }
 
-void lcdChar(char c) {
-    lcdSend(c, RS);
-}
-
 void lcdInit() {
     lcdCmd(0x33);
     lcdCmd(0x32);
@@ -71,23 +67,20 @@ void lcdInit() {
     lcdCmd(0x01);
 }
 
-void lcdSetCursor(int col, int row) {
+void lcdPrint(const string &s, int cursor) {
+    lcdCmd(0x01);
+    // this sets the writing cursor of the LCD screen
     int offsets[] = {0x80, 0xC0};
-    lcdCmd(offsets[row] + col);
-}
-
-void lcdPrint(const string &s) {
-    for (char c : s) lcdChar(c);
+    lcdCmd(offsets[cursor] + 0);
+    // this writes it by sending each char to LCD
+    for (char c : s) { lcdSend(c, RS); } 
 }
 
 int score = 0;
 
 void lcdShowScore() {
-    lcdCmd(0x01);
-    lcdSetCursor(0, 0);
-    lcdPrint("SCORE:");
-    lcdSetCursor(0, 1);
-    lcdPrint(to_string(score));
+    lcdPrint("SCORE:", 0);
+    lcdPrint(to_string(score), 1);
 }
 
 void LED_Flash(int target){
@@ -98,9 +91,7 @@ void LED_Flash(int target){
 }
 
 void flashFail() {
-    lcdCmd(0x01);
-    lcdSetCursor(0, 0);
-    lcdPrint("YOU FAIL");
+    lcdPrint("YOU FAIL", 0);
 
     for (int i = 0; i < 5; i++)
         digitalWrite(ledPins[i], HIGH);
@@ -127,16 +118,14 @@ int waitForButton() {
 int main() {
     srand(time(NULL));
 
-    // ---- GPIO ----
+    // init config
     wiringPiSetup();
-
     pinMode(START_BUTTON, INPUT);
     pullUpDnControl(START_BUTTON, PUD_UP);
 
     for (int i = 0; i < 5; i++) {
         pinMode(buttonPins[i], INPUT);
         pullUpDnControl(buttonPins[i], PUD_UP);
-
         pinMode(ledPins[i], OUTPUT);
     }
 
@@ -164,9 +153,7 @@ int main() {
         vector<int> target_list;
         target_list.push_back(target);
 
-        for (int i: target_list){
-            LED_Flash(target);
-        }
+        for (int i: target_list){ LED_Flash(target); }
 
         vector<int> input_list;
         input_list.clear();

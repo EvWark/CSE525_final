@@ -29,6 +29,8 @@ int lcd_fd;
 #define ENABLE 0x04
 #define RW 0x02
 #define RS 0x01
+//offsets for the cursor, 0x80 is the first row, 0xC0 is the 2nd row
+int LCD_offsets[] = {0x80, 0xC0};
 
 void lcdWriteByte(int data) {
     write(lcd_fd, &data, 1);
@@ -41,37 +43,30 @@ void lcdPulseEnable(int data) {
     usleep(500);
 }
 
-void lcdSend4bits(int data) {
-    lcdWriteByte(data);
-    lcdPulseEnable(data);
-}
-
 void lcdSend(int value, int mode) {
     int high = mode | (value & 0xF0) | LCD_BACKLIGHT;
     int low  = mode | ((value << 4) & 0xF0) | LCD_BACKLIGHT;
 
-    lcdSend4bits(high);
-    lcdSend4bits(low);
-}
-
-void lcdCmd(int cmd) {
-    lcdSend(cmd, 0);
+    lcdWriteByte(high);
+    lcdPulseEnable(high);
+    lcdWriteByte(low);
+    lcdPulseEnable(low);
 }
 
 void lcdInit() {
-    lcdCmd(0x33);
-    lcdCmd(0x32);
-    lcdCmd(0x28);
-    lcdCmd(0x0C);
-    lcdCmd(0x06);
-    lcdCmd(0x01);
+    lcdSend(0x33, 0);
+    lcdSend(0x32, 0);
+    lcdSend(0x28, 0);
+    lcdSend(0x0C, 0);
+    lcdSend(0x06, 0);
+    lcdSend(0x01, 0);
 }
 
 void lcdPrint(const string &s, int cursor) {
-    lcdCmd(0x01);
+    //sets the cursor value to 0, might not be neccesary
+    lcdSend(0x01, 0); 
     // this sets the writing cursor of the LCD screen
-    int offsets[] = {0x80, 0xC0};
-    lcdCmd(offsets[cursor] + 0);
+    lcdSend((LCD_offsets[cursor] + 0), 0);
     // this writes it by sending each char to LCD
     for (char c : s) { lcdSend(c, RS); } 
 }
@@ -116,13 +111,12 @@ int waitForButton() {
 
 // main function
 int main() {
-    srand(time(NULL));
-
     // init config
+    srand(time(NULL));
     wiringPiSetup();
     pinMode(START_BUTTON, INPUT);
     pullUpDnControl(START_BUTTON, PUD_UP);
-
+    
     for (int i = 0; i < 5; i++) {
         pinMode(buttonPins[i], INPUT);
         pullUpDnControl(buttonPins[i], PUD_UP);

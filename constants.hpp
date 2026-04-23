@@ -1,0 +1,26 @@
+/*
+This has pins defintion and offsets
+Most of these you should never need to mess with
+*/
+
+#ifndef PINSHPP
+#define PINSHPP
+// GPIO pins
+#define CONFIRM_BUTTON 5 // Start/confirm book
+int buttonPins[5] = {0, 3, 13, 16, 4}; // LED select buttons
+int ledPins[5]    = {7, 2, 12, 15, 1}; // LED pins
+// these corispond 1:1 so button 1 goes to LED 1. This connects int wiringPI pin number to GPIO pins
+// it would be easier to change these values when rewiring then it would be to find what GPIO the go to exactly imo
+
+// I2C config
+#define I2C_ADDR 0x27
+
+// LCD control bits
+#define LCD_BACKLIGHT 0x08
+#define ENABLE 0x04
+#define RW 0x02
+#define RS 0x01
+//offsets for the cursor, 0x80 is the first row, 0xC0 is the 2nd row
+int LCD_offsets[] = {0x80, 0xC0};
+
+#endif

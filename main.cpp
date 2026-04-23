@@ -6,31 +6,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
-
+#include "constants.hpp"
 #include <wiringPi.h>
 
 using namespace std;
 
-// GPIO pins
-#define CONFIRM_BUTTON 5 // Start/confirm book
-int buttonPins[5] = {0, 3, 13, 16, 4}; // LED select buttons
-int ledPins[5]    = {7, 2, 12, 15, 1}; // LED pins
-// these corispond 1:1 so button 1 goes to LED 1. This connects int wiringPI pin number to GPIO pins
-// it would be easier to change these values when rewiring then it would be to find what GPIO the go to exactly imo
-
-// I2C config
-#define I2C_ADDR 0x27
-
-
 int lcd_fd;
-
-// LCD control bits
-#define LCD_BACKLIGHT 0x08
-#define ENABLE 0x04
-#define RW 0x02
-#define RS 0x01
-//offsets for the cursor, 0x80 is the first row, 0xC0 is the 2nd row
-int LCD_offsets[] = {0x80, 0xC0};
 
 void lcdWriteByte(int data) {
     write(lcd_fd, &data, 1);
@@ -80,7 +61,7 @@ void lcdShowScore() {
 
 void LED_Flash(int target){
     digitalWrite(ledPins[target], HIGH);
-    delay(400);
+    delay(500);
     digitalWrite(ledPins[target], LOW);
     return;
 }
@@ -88,15 +69,14 @@ void LED_Flash(int target){
 void flashFail() {
     lcdPrint("YOU FAIL", 0);
 
-    for (int i = 0; i < 5; i++)
-        digitalWrite(ledPins[i], HIGH);
-
+    for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], HIGH); }
     delay(500);
-    for (int i = 0; i < 5; i++)
-        digitalWrite(ledPins[i], LOW);
+    for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], LOW); }
 }
 
-//this holds the program until a button is pressed
+// this holds the program until a button is pressed
+// kind of badly made but it works i guess
+// need to add a value to bounce out of this if you wait too long
 int waitForButton() {
     while (true) {
         for (int i = 0; i < 5; i++) {
@@ -108,7 +88,6 @@ int waitForButton() {
     }
 }
 
-
 // main function
 int main() {
     // init config
@@ -116,7 +95,7 @@ int main() {
     wiringPiSetup();
     pinMode(START_BUTTON, INPUT);
     pullUpDnControl(START_BUTTON, PUD_UP);
-    
+
     for (int i = 0; i < 5; i++) {
         pinMode(buttonPins[i], INPUT);
         pullUpDnControl(buttonPins[i], PUD_UP);
@@ -136,10 +115,12 @@ int main() {
     }*/
 
     lcdInit();
-    lcdShowScore();
+    lcdPrint( "Waiting for start button", 0)
     cout << "Waiting for start button" << endl();
-
     while (digitalRead(START_BUTTON) == HIGH);
+    // displays score
+    lcdPrint("SCORE:", 0);
+    lcdPrint(to_string(score), 1);
 
     // Game Loop
     while (true) {
@@ -159,7 +140,9 @@ int main() {
         
         if (input_list == target_list) {
             score++;
-            lcdShowScore();
+            // displays score
+            lcdPrint("SCORE:", 0);
+            lcdPrint(to_string(score), 1);
         } else {
             flashFail();
 

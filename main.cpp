@@ -3,19 +3,19 @@
 #include <cstdlib>
 #include <ctime>
 #include <wiringPi.h>
-#include <PCF8574.h>   // from xreef library
+#include "PCF8574_library/PCF8574.h"
 
-// ---- CONFIG ----
+
 #define START_BUTTON 0
 
-int ledPins[5]    = {1, 2, 3, 4, 5};   // wiringPi pin numbers
+int ledPins[5]    = {1, 2, 3, 4, 5};   
 int buttonPins[5] = {6, 7, 8, 9, 10};
 
-PCF8574 lcd(0x27); // adjust I2C address if needed
+PCF8574 lcd(0x27); 
 
 int score = 0;
 
-// ---- FUNCTIONS ----
+
 void setupGPIO() {
     wiringPiSetup();
 

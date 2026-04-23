@@ -2,56 +2,116 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/i2c-dev.h>
+
 #include <wiringPi.h>
-#include "PCF8574_library/PCF8574.h"
 
-
+// =====================
+// GPIO CONFIG
+// =====================
 #define START_BUTTON 0
 
-int ledPins[5]    = {1, 2, 3, 4, 5};   
-int buttonPins[5] = {6, 7, 8, 9, 10};
+int buttonPins[5] = {2, 3, 4, 5, 6};
+int ledPins[5]    = {1, 7, 10, 11, 21};
 
-PCF8574 lcd(0x27); 
+// =====================
+// I2C LCD CONFIG
+// =====================
+#define I2C_ADDR 0x27
+#define I2C_DEV  "/dev/i2c-1"
 
-int score = 0;
+int lcd_fd;
 
+// LCD control bits (PCF8574 backpack typical mapping)
+#define LCD_BACKLIGHT 0x08
+#define ENABLE 0x04
+#define RW 0x02
+#define RS 0x01
 
-void setupGPIO() {
-    wiringPiSetup();
-
-    pinMode(START_BUTTON, INPUT);
-    pullUpDnControl(START_BUTTON, PUD_UP);
-
-    for (int i = 0; i < 5; i++) {
-        pinMode(ledPins[i], OUTPUT);
-        pinMode(buttonPins[i], INPUT);
-        pullUpDnControl(buttonPins[i], PUD_UP);
-    }
+// =====================
+// LOW LEVEL LCD I2C
+// =====================
+void lcdWriteByte(int data) {
+    write(lcd_fd, &data, 1);
 }
 
-void lcdPrintScore() {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("SCORE:");
-    lcd.setCursor(0, 1);
-    lcd.print(score);
+void lcdPulseEnable(int data) {
+    lcdWriteByte(data | ENABLE);
+    usleep(500);
+    lcdWriteByte(data & ~ENABLE);
+    usleep(500);
+}
+
+void lcdSend4bits(int data) {
+    lcdWriteByte(data);
+    lcdPulseEnable(data);
+}
+
+void lcdSend(int value, int mode) {
+    int high = mode | (value & 0xF0) | LCD_BACKLIGHT;
+    int low  = mode | ((value << 4) & 0xF0) | LCD_BACKLIGHT;
+
+    lcdSend4bits(high);
+    lcdSend4bits(low);
+}
+
+void lcdCmd(int cmd) {
+    lcdSend(cmd, 0);
+}
+
+void lcdChar(char c) {
+    lcdSend(c, RS);
+}
+
+void lcdInit() {
+    lcdCmd(0x33);
+    lcdCmd(0x32);
+    lcdCmd(0x28);
+    lcdCmd(0x0C);
+    lcdCmd(0x06);
+    lcdCmd(0x01);
+}
+
+void lcdSetCursor(int col, int row) {
+    int offsets[] = {0x80, 0xC0};
+    lcdCmd(offsets[row] + col);
+}
+
+void lcdPrint(const std::string &s) {
+    for (char c : s) lcdChar(c);
+}
+
+// =====================
+// GAME LOGIC
+// =====================
+int score = 0;
+
+void lcdShowScore() {
+    lcdCmd(0x01);
+    lcdSetCursor(0, 0);
+    lcdPrint("SCORE:");
+    lcdSetCursor(0, 1);
+    lcdPrint(std::to_string(score));
 }
 
 void flashFail() {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("YOU FAIL");
+    lcdCmd(0x01);
+    lcdSetCursor(0, 0);
+    lcdPrint("YOU FAIL");
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++)
         digitalWrite(ledPins[i], HIGH);
-    }
+
     delay(500);
-    for (int i = 0; i < 5; i++) {
+
+    for (int i = 0; i < 5; i++)
         digitalWrite(ledPins[i], LOW);
-    }
 }
 
-int waitForButtonPress() {
+int waitForButton() {
     while (true) {
         for (int i = 0; i < 5; i++) {
             if (digitalRead(buttonPins[i]) == LOW) {
@@ -62,55 +122,73 @@ int waitForButtonPress() {
     }
 }
 
-// ---- MAIN ----
+// =====================
+// MAIN
+// =====================
 int main() {
     srand(time(NULL));
 
-    setupGPIO();
+    // ---- GPIO ----
+    wiringPiSetup();
 
-    // LCD init
-    lcd.begin(16, 2);
-    lcd.setBacklight(255);
+    pinMode(START_BUTTON, INPUT);
+    pullUpDnControl(START_BUTTON, PUD_UP);
 
-    lcdPrintScore();
+    for (int i = 0; i < 5; i++) {
+        pinMode(buttonPins[i], INPUT);
+        pullUpDnControl(buttonPins[i], PUD_UP);
+
+        pinMode(ledPins[i], OUTPUT);
+    }
+
+    // ---- I2C LCD ----
+    lcd_fd = open(I2C_DEV, O_RDWR);
+    if (lcd_fd < 0) {
+        std::cerr << "Failed to open I2C device\n";
+        return 1;
+    }
+
+    if (ioctl(lcd_fd, I2C_SLAVE, I2C_ADDR) < 0) {
+        std::cerr << "Failed to set I2C address\n";
+        return 1;
+    }
+
+    lcdInit();
+    lcdShowScore();
 
     std::cout << "Waiting for start button...\n";
 
-    // wait for start
     while (digitalRead(START_BUTTON) == HIGH);
 
-    std::vector<int> sequence;
-
+    // =====================
+    // GAME LOOP
+    // =====================
     while (true) {
-        int next = rand() % 5;
-        sequence.push_back(next);
+        int target = rand() % 5;
 
-        // show sequence (only latest for simplicity)
-        digitalWrite(ledPins[next], HIGH);
-        delay(500);
-        digitalWrite(ledPins[next], LOW);
+        digitalWrite(ledPins[target], HIGH);
+        delay(400);
+        digitalWrite(ledPins[target], LOW);
 
-        // user input
-        int input = waitForButtonPress();
+        int input = waitForButton();
 
-        if (input == next) {
+        if (input == target) {
             score++;
-            lcdPrintScore();
+            lcdShowScore();
         } else {
             flashFail();
 
             std::string name;
-            std::cout << "Enter your name: ";
+            std::cout << "Enter name: ";
             std::cin >> name;
 
-            std::cout << "Submitting score for " << name
-                      << " Score: " << score << std::endl;
-
-            // TODO: push to website (HTTP POST via curl/libcurl)
+            std::cout << "NAME: " << name
+                      << " SCORE: " << score << std::endl;
 
             break;
         }
     }
 
+    close(lcd_fd);
     return 0;
 }

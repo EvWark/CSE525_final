@@ -107,7 +107,7 @@ void flashFail() {
 
     delay(500);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 6; i++)
         digitalWrite(ledPins[i], LOW);
 }
 

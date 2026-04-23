@@ -12,7 +12,7 @@
 // =====================
 // GPIO CONFIG
 // =====================
-#define START_BUTTON 0
+#define START_BUTTON 25
 
 int buttonPins[5] = {2, 3, 4, 5, 6};
 int ledPins[5]    = {1, 7, 10, 11, 21};

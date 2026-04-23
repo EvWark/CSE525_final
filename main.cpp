@@ -9,31 +9,27 @@
 
 #include <wiringPi.h>
 
-// =====================
-// GPIO CONFIG
-// =====================
-#define START_BUTTON 5
+using namespace std;
 
-int buttonPins[5] = {0, 3, 13, 16, 4};
-int ledPins[5]    = {7, 2, 12, 15, 1};
+// GPIO pins
+#define CONFIRM_BUTTON 5 // Start/confirm book
+int buttonPins[5] = {0, 3, 13, 16, 4}; // LED select buttons
+int ledPins[5]    = {7, 2, 12, 15, 1}; // LED pins
+// these corispond 1:1 so button 1 goes to LED 1. This connects int wiringPI pin number to GPIO pins
+// it would be easier to change these values when rewiring then it would be to find what GPIO the go to exactly imo
 
-// =====================
-// I2C LCD CONFIG
-// =====================
+// I2C config
 #define I2C_ADDR 0x27
-#define I2C_DEV  "/dev/i2c-1"
+
 
 int lcd_fd;
 
-// LCD control bits (PCF8574 backpack typical mapping)
+// LCD control bits
 #define LCD_BACKLIGHT 0x08
 #define ENABLE 0x04
 #define RW 0x02
 #define RS 0x01
 
-// =====================
-// LOW LEVEL LCD I2C
-// =====================
 void lcdWriteByte(int data) {
     write(lcd_fd, &data, 1);
 }
@@ -80,13 +76,10 @@ void lcdSetCursor(int col, int row) {
     lcdCmd(offsets[row] + col);
 }
 
-void lcdPrint(const std::string &s) {
+void lcdPrint(const string &s) {
     for (char c : s) lcdChar(c);
 }
 
-// =====================
-// GAME LOGIC
-// =====================
 int score = 0;
 
 void lcdShowScore() {
@@ -94,7 +87,14 @@ void lcdShowScore() {
     lcdSetCursor(0, 0);
     lcdPrint("SCORE:");
     lcdSetCursor(0, 1);
-    lcdPrint(std::to_string(score));
+    lcdPrint(to_string(score));
+}
+
+void LED_Flash(int target){
+    digitalWrite(ledPins[target], HIGH);
+    delay(400);
+    digitalWrite(ledPins[target], LOW);
+    return;
 }
 
 void flashFail() {
@@ -106,11 +106,11 @@ void flashFail() {
         digitalWrite(ledPins[i], HIGH);
 
     delay(500);
-
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 5; i++)
         digitalWrite(ledPins[i], LOW);
 }
 
+//this holds the program until a button is pressed
 int waitForButton() {
     while (true) {
         for (int i = 0; i < 5; i++) {
@@ -122,9 +122,8 @@ int waitForButton() {
     }
 }
 
-// =====================
-// MAIN
-// =====================
+
+// main function
 int main() {
     srand(time(NULL));
 
@@ -141,49 +140,54 @@ int main() {
         pinMode(ledPins[i], OUTPUT);
     }
 
-    // ---- I2C LCD ----
-    lcd_fd = open(I2C_DEV, O_RDWR);
+    // #define I2C_DEV  "/dev/i2c-1"
+    lcd_fd = open("/dev/i2c-1", O_RDWR);
+    /*
     if (lcd_fd < 0) {
         std::cerr << "Failed to open I2C device\n";
         return 1;
     }
-
     if (ioctl(lcd_fd, I2C_SLAVE, I2C_ADDR) < 0) {
         std::cerr << "Failed to set I2C address\n";
         return 1;
-    }
+    }*/
 
     lcdInit();
     lcdShowScore();
-
-    std::cout << "Waiting for start button...\n";
+    cout << "Waiting for start button" << endl();
 
     while (digitalRead(START_BUTTON) == HIGH);
 
-    // =====================
-    // GAME LOOP
-    // =====================
+    // Game Loop
     while (true) {
         int target = rand() % 5;
+        vector<int> target_list;
+        target_list.push_back(target);
 
-        digitalWrite(ledPins[target], HIGH);
-        delay(400);
-        digitalWrite(ledPins[target], LOW);
+        for (int i: target_list){
+            LED_Flash(target);
+        }
 
-        int input = waitForButton();
-
-        if (input == target) {
+        vector<int> input_list;
+        input_list.clear();
+        for (int i: target_list){
+            int input = waitForButton();
+            input_list.push_back(input);
+            LED_Flash(input);
+        }
+        
+        if (input_list == target_list) {
             score++;
             lcdShowScore();
         } else {
             flashFail();
 
-            std::string name;
-            std::cout << "Enter name: ";
-            std::cin >> name;
+            string name;
+            cout << "Enter name: ";
+            cin >> name;
 
-            std::cout << "NAME: " << name
-                      << " SCORE: " << score << std::endl;
+            cout << "NAME: " << name
+                      << " SCORE: " << score << endl;
 
             break;
         }

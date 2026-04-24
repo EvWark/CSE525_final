@@ -20,7 +20,6 @@ using namespace std;
 
 int lcd_fd;
 vector<BrainSample> samples;
-mutex samplesMutex;
 atomic<bool> brainRunning(true);
 
 // this checks if there is a update from serial
@@ -35,7 +34,7 @@ void brainCollector(Brain* brain){
 
             uint32_t* power = brain->readPowerArray();
             for (int i = 0; i < EEG_POWER_BANDS; i++){
-                s.eeg[i] = power[i];
+                bs.eeg[i] = power[i];
             }
             
             samples.push_back(s);
@@ -182,10 +181,10 @@ int main() {
     lcdInit();
 
     // open serial at Baudrate 9600
-    int serialFd = openSerial(SER_DEV, B9600)
+    int serialFd = openSerial(SER_DEV, B9600);
 
-    Brain Brain(serialFd);
-    thread brainThread(brainCollector, &Brain);
+    Brain brain(serialFd);
+    thread brainThread(brainCollector, &brain);
     
     lcdPrint("Press the", 0, true);
     lcdPrint("start button", 1, false);

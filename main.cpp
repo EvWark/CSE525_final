@@ -131,6 +131,7 @@ int main() {
     vector<int> target_list;
     while (true) {
         int target = rand() % 5;
+        cout << target << endl;
         target_list.push_back(target);
         for (int i: target_list){ LED_Flash(target_list[i]); }
 
@@ -149,13 +150,13 @@ int main() {
             lcdPrint(to_string(score), 1);
         } else {
             flashFail();
-
+            /*
             string name;
             cout << "Enter name: ";
             cin >> name;
 
             cout << "NAME: " << name << " SCORE: " << score << endl;
-
+*/
             break;
         }
     }

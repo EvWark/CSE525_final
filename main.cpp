@@ -116,7 +116,7 @@ int main() {
 
     lcdInit();
     lcdPrint( "Waiting for start button", 0);
-    cout << "Waiting for start button" << endl();
+    cout << "Waiting for start button" << endl;
     while (digitalRead(CONFIRM_BUTTON) == HIGH);
     // displays score
     lcdPrint("SCORE:", 0);

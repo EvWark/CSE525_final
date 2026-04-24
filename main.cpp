@@ -37,7 +37,7 @@ void brainCollector(Brain* brain){
                 bs.eeg[i] = power[i];
             }
             
-            samples.push_back(s);
+            samples.push_back(bs);
             usleep(200);
         }
     }

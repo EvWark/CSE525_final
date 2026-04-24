@@ -113,7 +113,8 @@ int main() {
     lcd_fd = open(I2C_DEV, O_RDWR);
 
     lcdInit();
-    lcdPrint( "Waiting for start button", 0);
+    lcdPrint("Press the", 0);
+    lcdPrint("start button", 1)
     cout << "Waiting for start button" << endl;
     while (digitalRead(CONFIRM_BUTTON) == HIGH);
     // displays score

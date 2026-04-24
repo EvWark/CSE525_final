@@ -51,7 +51,7 @@ void lcdInit() {
 
 void lcdPrint(const string &s, int cursor) {
     //sets the cursor value to 0, might not be neccesary
-    lcdSend(0x01, 0); 
+    //lcdSend(0x01, 0); 
     // this sets the writing cursor of the LCD screen
     lcdSend((LCD_offsets[cursor] + 0), 0);
     // this writes it by sending each char to LCD

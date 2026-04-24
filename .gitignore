@@ -6,5 +6,6 @@
 *.csv
 *.xlsx
 *.docx
+*.o
 include/*
 !include/.deleteme

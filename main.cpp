@@ -113,9 +113,9 @@ int main() {
         pinMode(ledPins[i], OUTPUT);
     }
 
-    // #define I2C_DEV  "/dev/i2c-1"
-    lcd_fd = open("/dev/i2c-1", O_RDWR);
-    /*
+    #define I2C_DEV  "/dev/i2c-1"
+    lcd_fd = open(I2C_DEV, O_RDWR);
+    /**/
     if (lcd_fd < 0) {
         std::cerr << "Failed to open I2C device\n";
         return 1;
@@ -123,7 +123,7 @@ int main() {
     if (ioctl(lcd_fd, I2C_SLAVE, I2C_ADDR) < 0) {
         std::cerr << "Failed to set I2C address\n";
         return 1;
-    }*/
+    }
 
     lcdInit();
     lcdPrint( "Waiting for start button", 0);

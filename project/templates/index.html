@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>High Scores</title>
+</head>
+<body>
+
+<h1>High Scores</h1>
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Name</th>
+        <th>Score</th>
+        <th>Avg Attention</th>
+    </tr>
+
+    {% for s in scores %}
+    <tr>
+        <td>{{ s.name }}</td>
+        <td>{{ s.score }}</td>
+        <td>{{ s.attention }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

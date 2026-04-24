@@ -231,7 +231,7 @@ int main() {
             cout << "Enter name: ";
             cin >> name;
             // we can replace cout with a push to the website or smt
-            cout << "NAME: " << name << " SCORE: " << score << endl;
+            cout << "NAME: " << name << "\nSCORE: " << score << "\nAverage focus: " << avgAttention << endl;
 
             break;
         }

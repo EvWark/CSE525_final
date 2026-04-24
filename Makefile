@@ -1,27 +1,21 @@
-# ===== Compiler =====
 CXX = g++
 CXXFLAGS = -Wall -std=c++17 -O2
 
-# ===== Project structure =====
-SRC = main.cpp
-OBJ = main.o
+SRC = main.cpp brain.cpp
+OBJ = $(SRC:.cpp=.o)
 TARGET = game
 
-# ===== External includes =====
 INCLUDES = -I./include
 
-# ===== Libraries =====
-LIBS = -lwiringPi
-
-# ===== Build rules =====
+LIBS = -lwiringPi -lpthread
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ) -o $(TARGET) $(LIBS)
 
-$(OBJ): $(SRC)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(SRC) -o $(OBJ)
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
 	rm -f $(OBJ) $(TARGET)

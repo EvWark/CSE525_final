@@ -8,11 +8,11 @@ https://github.com/kitschpatrol/brain/blob/main/Brain.cpp
 */
 
 #include <cstdio>
-#include <string<
+#include <string>
 #include <cstdint>
 #include <iostream>
 #include <unistd.h>
-#include "Brain.h"
+#include "brain.hpp"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ void Brain::init() {
     clearEegPower();
 }
 
-boolean Brain::update() {
+bool Brain::update() {
     uint8_t byte;
     int n = read(serialFd, &byte, 1);
 
@@ -86,7 +86,7 @@ boolean Brain::update() {
 
                 // Do they match?
                 if (checksum == checksumAccumulator) {
-                    boolean parseSuccess = parsePacket();
+                    bool parseSuccess = parsePacket();
 
                     if (parseSuccess) {
                         freshPacket = true;
@@ -146,12 +146,12 @@ void Brain::clearEegPower() {
     }
 }
 
-boolean Brain::parsePacket() {
+bool Brain::parsePacket() {
     // Loop through the packet, extracting data.
     // Based on mindset_communications_protocol.pdf from the Neurosky Mindset SDK.
     // Returns true if passing succeeds
     hasPower = false;
-    boolean parseSuccess = true;
+    bool parseSuccess = true;
     // int rawValue = 0;
 
     clearEegPower();    // clear the eeg power to make sure we're honest about missing values
@@ -267,13 +267,13 @@ char* Brain::readCSV() {
 void Brain::printPacket() {
     printf("[");
     for (uint8_t i = 0; i < MAX_PACKET_LENGTH; i++) {
-        printf(packetData[i], DEC);
+        printf("%d", packetData[i]);
 
             if (i < MAX_PACKET_LENGTH - 1) {
                 printf(", ");
             }
     }
-    printfln("]");
+    printf("]\n");
 }
 
 void Brain::printDebug() {

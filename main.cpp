@@ -49,9 +49,9 @@ void lcdInit() {
     lcdSend(0x01, 0);
 }
 
-void lcdPrint(const string &s, int cursor) {
+void lcdPrint(const string &s, int cursor, bool LCDclear) {
     //sets the cursor value to 0, might not be neccesary
-    //lcdSend(0x01, 0); 
+    if(LCDclear == true){ lcdCmd(0x01); }
     // this sets the writing cursor of the LCD screen
     lcdSend((LCD_offsets[cursor] + 0), 0);
     // this writes it by sending each char to LCD
@@ -61,8 +61,8 @@ void lcdPrint(const string &s, int cursor) {
 int score = 0;
 
 void lcdShowScore() {
-    lcdPrint("SCORE:", 0);
-    lcdPrint(to_string(score), 1);
+    lcdPrint("SCORE:", 0, true);
+    lcdPrint(to_string(score), 1, false);
 }
 
 void LED_Flash(int target){
@@ -74,7 +74,7 @@ void LED_Flash(int target){
 }
 
 void flashFail() {
-    lcdPrint("YOU FAILED", 0);
+    lcdPrint("YOU FAILED", 0, true);
     int i = 0;
     while(i < 3){
         for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], HIGH); }
@@ -126,8 +126,8 @@ int main() {
     }
 
     lcdInit();
-    lcdPrint("Press the", 0);
-    lcdPrint("start button", 1);
+    lcdPrint("Press the", 0, true);
+    lcdPrint("start button", 1, false);
     cout << "Waiting for start button" << endl;
     while (digitalRead(CONFIRM_BUTTON) == HIGH);
     // displays score

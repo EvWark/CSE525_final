@@ -8,7 +8,7 @@ Most of these you should never need to mess with
 // GPIO pins
 #define CONFIRM_BUTTON 5 // Start/confirm book
 int buttonPins[5] = {0, 3, 13, 16, 4}; // LED select buttons
-int ledPins[5]    = {7, 2, 12, 15, 1}; // LED pins
+int ledPins[5]    = {14, 2, 12, 15, 1}; // LED pins
 // these corispond 1:1 so button 1 goes to LED 1. This connects int wiringPI pin number to GPIO pins
 // it would be easier to change these values when rewiring then it would be to find what GPIO the go to exactly imo
 

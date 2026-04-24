@@ -123,12 +123,11 @@ int main() {
     lcdPrint(to_string(score), 1);
 
     // Game Loop
+    vector<int> target_list;
     while (true) {
         int target = rand() % 5;
-        vector<int> target_list;
         target_list.push_back(target);
-
-        for (int i: target_list){ LED_Flash(target); }
+        for (int i: target_list){ LED_Flash(target_list[i]); }
 
         vector<int> input_list;
         input_list.clear();
@@ -150,8 +149,7 @@ int main() {
             cout << "Enter name: ";
             cin >> name;
 
-            cout << "NAME: " << name
-                      << " SCORE: " << score << endl;
+            cout << "NAME: " << name << " SCORE: " << score << endl;
 
             break;
         }

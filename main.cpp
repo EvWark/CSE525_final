@@ -4,9 +4,9 @@
 #include <ctime>
 #include <unistd.h>
 #include <fcntl.h>
-#include <mutex>
 #include <atomic>
 #include <thread>
+#include <termios.h>
 
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
@@ -33,7 +33,7 @@ void brainCollector(Brain* brain){
             bs.attention = brain->readAttention();
             bs.meditation = brain->readMeditation();
 
-            uint32_t* power = brain->readPowerArray():
+            uint32_t* power = brain->readPowerArray();
             for (int i = 0; i < EEG_POWER_BANDS; i++){
                 s.eeg[i] = power[i];
             }
@@ -184,8 +184,8 @@ int main() {
     // open serial at Baudrate 9600
     int serialFd = openSerial(SER_DEV, B9600)
 
-    Brain brain(serialFd);
-    thread brainThread(brainCollector, &brain);
+    Brain Brain(serialFd);
+    thread brainThread(brainCollector, &Brain);
     
     lcdPrint("Press the", 0, true);
     lcdPrint("start button", 1, false);

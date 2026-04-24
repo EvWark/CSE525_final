@@ -24,14 +24,17 @@ void lcdPulseEnable(int data) {
     usleep(500);
 }
 
+void lcdSend4bits(int data) {
+    lcdWriteByte(data);
+    lcdPulseEnable(data);
+}
+
 void lcdSend(int value, int mode) {
     int high = mode | (value & 0xF0) | LCD_BACKLIGHT;
     int low  = mode | ((value << 4) & 0xF0) | LCD_BACKLIGHT;
 
-    lcdWriteByte(high);
-    lcdPulseEnable(high);
-    lcdWriteByte(low);
-    lcdPulseEnable(low);
+    lcdSend4bits(high);
+    lcdSend4bits(low);
 }
 
 void lcdInit() {

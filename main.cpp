@@ -37,13 +37,21 @@ void lcdSend(int value, int mode) {
     lcdSend4bits(low);
 }
 
+void lcdCmd(int cmd) {
+    lcdSend(cmd, 0);
+}
+
+void lcdChar(char c) {
+    lcdSend(c, RS);
+}
+
 void lcdInit() {
-    lcdSend(0x33, 0);
-    lcdSend(0x32, 0);
-    lcdSend(0x28, 0);
-    lcdSend(0x0C, 0);
-    lcdSend(0x06, 0);
-    lcdSend(0x01, 0);
+    lcdCmd(0x33);
+    lcdCmd(0x32);
+    lcdCmd(0x28);
+    lcdCmd(0x0C);
+    lcdCmd(0x06);
+    lcdCmd(0x01);
 }
 
 void lcdPrint(const string &s, int cursor) {

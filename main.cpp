@@ -232,7 +232,15 @@ int main() {
             cin >> name;
             // we can replace cout with a push to the website or smt
             cout << "NAME: " << name << "\nSCORE: " << score << "\nAverage focus: " << avgAttention << endl;
+            
+            string cmd =
+            "curl -X POST http://127.0.0.1:5000/submit "
+            "-H 'Content-Type: application/json' "
+            "-d '{\"name\":\"" + name + "\","
+            "\"score\":" + to_string(score) + ","
+            "\"attention\":" + to_string(avgAttention) + "}'";
 
+            system(cmd.c_str());
             break;
         }
     }

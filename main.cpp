@@ -55,7 +55,7 @@ pair<string, string> stringSplit(string& input){
     return {first, second};
 }
 
-void lcdPrint(const string &s, int cursor) {
+void lcdPrint(const string s, int cursor) {
     pair [line1, line2] = stringSplit(s);
 
     //sets the cursor value to 0, might not be neccesary

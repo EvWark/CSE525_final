@@ -66,8 +66,9 @@ void lcdShowScore() {
 
 void LED_Flash(int target){
     digitalWrite(ledPins[target], HIGH);
-    delay(500);
+    delay(400);
     digitalWrite(ledPins[target], LOW);
+    delay(100);
     return;
 }
 
@@ -133,7 +134,7 @@ int main() {
         int target = rand() % 5;
         cout << target << endl;
         target_list.push_back(target);
-        for (int i: target_list){ LED_Flash(target_list[i]); }
+        for (int value: target_list){ LED_Flash(value); }
 
         vector<int> input_list;
         input_list.clear();

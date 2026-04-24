@@ -14,6 +14,7 @@ int ledPins[5]    = {14, 2, 12, 15, 1}; // LED pins
 
 // I2C config
 #define I2C_ADDR 0x27
+#define I2C_DEV  "/dev/i2c-1"
 
 // LCD control bits
 #define LCD_BACKLIGHT 0x08

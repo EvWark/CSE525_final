@@ -74,11 +74,15 @@ void LED_Flash(int target){
 }
 
 void flashFail() {
-    lcdPrint("YOU FAIL", 0);
-
-    for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], HIGH); }
-    delay(500);
-    for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], LOW); }
+    lcdPrint("YOU FAILED", 0);
+    int i = 0;
+    while(i < 3){
+        for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], HIGH); }
+        delay(400);
+        for (int i = 0; i < 5; i++) { digitalWrite(ledPins[i], LOW); }
+        delay(100);
+        i++;
+    }
 }
 
 // this holds the program until a button is pressed
@@ -114,7 +118,7 @@ int main() {
 
     lcdInit();
     lcdPrint("Press the", 0);
-    lcdPrint("start button", 1)
+    lcdPrint("start button", 1);
     cout << "Waiting for start button" << endl;
     while (digitalRead(CONFIRM_BUTTON) == HIGH);
     // displays score

@@ -93,8 +93,8 @@ int main() {
     // init config
     srand(time(NULL));
     wiringPiSetup();
-    pinMode(START_BUTTON, INPUT);
-    pullUpDnControl(START_BUTTON, PUD_UP);
+    pinMode(CONFIRM_BUTTON, INPUT);
+    pullUpDnControl(CONFIRM_BUTTON, PUD_UP);
 
     for (int i = 0; i < 5; i++) {
         pinMode(buttonPins[i], INPUT);
@@ -115,7 +115,7 @@ int main() {
     }*/
 
     lcdInit();
-    lcdPrint( "Waiting for start button", 0)
+    lcdPrint( "Waiting for start button", 0);
     cout << "Waiting for start button" << endl();
     while (digitalRead(START_BUTTON) == HIGH);
     // displays score

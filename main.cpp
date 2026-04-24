@@ -4,6 +4,7 @@
 #include <ctime>
 #include <unistd.h>
 #include <fcntl.h>
+#include <utility>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 #include "constants.hpp"
@@ -48,13 +49,22 @@ void lcdInit() {
     lcdSend(0x01, 0);
 }
 
+pair<string, string> stringSplit(string& input){
+    string first = input.substr(0,16);
+    string second = input.substr(16,16);
+    return {first, second};
+}
+
 void lcdPrint(const string &s, int cursor) {
+    pair [line1, line2] = stringSplit(&s);
+
     //sets the cursor value to 0, might not be neccesary
     lcdSend(0x01, 0); 
     // this sets the writing cursor of the LCD screen
-    lcdSend((LCD_offsets[cursor] + 0), 0);
+    lcdSend((LCD_offsets[0] + 0), 0);
     // this writes it by sending each char to LCD
-    for (char c : s) { lcdSend(c, RS); } 
+    for (char c : line1) { lcdSend(c, RS); } 
+    for (char c : line2) { lcdSend(c, RS); } 
 }
 
 int score = 0;
@@ -125,8 +135,8 @@ int main() {
     cout << "Waiting for start button" << endl;
     while (digitalRead(CONFIRM_BUTTON) == HIGH);
     // displays score
-    lcdPrint("SCORE:", 0);
-    lcdPrint(to_string(score), 1);
+    lcdPrint("SCORE:          " + to_string(score), 0);
+    //lcdPrint(to_string(score), 1);
 
     // Game Loop
     vector<int> target_list;
@@ -151,13 +161,13 @@ int main() {
             lcdPrint(to_string(score), 1);
         } else {
             flashFail();
-            /*
+            
             string name;
             cout << "Enter name: ";
             cin >> name;
-
+            // we can replace cout with a push to the website or smt
             cout << "NAME: " << name << " SCORE: " << score << endl;
-*/
+
             break;
         }
     }

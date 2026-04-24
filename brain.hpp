@@ -90,4 +90,12 @@ private:
     uint32_t eegPower[EEG_POWER_BANDS];
 };
 
+// add this as a cut down sample of the eeg input
+struct BrainSample{
+    uint8_t signalQuality;
+    uint8_t attention;
+    uint8_t meditation;
+    uint32_t eeg[EEG_POWER_BANDS];
+};
+
 #endif

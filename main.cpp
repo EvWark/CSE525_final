@@ -4,15 +4,69 @@
 #include <ctime>
 #include <unistd.h>
 #include <fcntl.h>
-#include <utility>
+#include <mutex>
+#include <atomic>
+#include <thread>
+
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
+
 #include "constants.hpp"
+#include "brain.hpp"
+
 #include <wiringPi.h>
 
 using namespace std;
 
 int lcd_fd;
+vector<BrainSample> samples;
+mutex samplesMutex;
+atomic<bool> brainRunning(true);
+
+// this checks if there is a update from serial
+void brainCollector(Brain* brain){
+    while (brainRunning){
+        if (brain->update()){
+            BrainSample bs;
+            
+            bs.signalQuality = brain->readSignalQuality();
+            bs.attention = brain->readAttention();
+            bs.meditation = brain->readMeditation();
+
+            uint32_t* power = brain->readPowerArray():
+            for (int i = 0; i < EEG_POWER_BANDS; i++){
+                s.eeg[i] = power[i];
+            }
+            
+            samples.push_back(s);
+            usleep(200);
+        }
+    }
+}
+
+int openSerial(const char* device, int baudrate) {
+    int fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+
+    termios options;
+    tcgetattr(fd, &options);
+
+    cfsetispeed(&options, baudrate);
+    cfsetospeed(&options, baudrate);
+
+    options.c_cflag |= (CLOCAL | CREAD);
+    options.c_cflag &= ~PARENB;
+    options.c_cflag &= ~CSTOPB;
+    options.c_cflag &= ~CSIZE;
+    options.c_cflag |= CS8;
+
+    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    options.c_iflag &= ~(IXON | IXOFF | IXANY);
+    options.c_oflag &= ~OPOST;
+
+    tcsetattr(fd, TCSANOW, &options);
+
+    return fd;
+}
 
 void lcdWriteByte(int data) {
     write(lcd_fd, &data, 1);
@@ -126,6 +180,13 @@ int main() {
     }
 
     lcdInit();
+
+    // open serial at Baudrate 9600
+    int serialFd = openSerial(SER_DEV, B9600)
+
+    Brain brain(serialFd);
+    thread brainThread(brainCollector, &brain);
+    
     lcdPrint("Press the", 0, true);
     lcdPrint("start button", 1, false);
     cout << "Waiting for start button" << endl;
@@ -154,6 +215,17 @@ int main() {
             lcdShowScore();            
         } else {
             flashFail();
+
+            brainRunning = false;
+            // this delay exists to prevent a race condition with joining the thread and push_back in the thread
+            // easier than worrying about mutex's
+            delay(50);
+            brainThread.join();
+            double avgAttention = 0;
+            for (const BrainSample& bs: samples){
+                avgAttention += bs.attention;
+            }
+            avgAttention /= samples.size();
             
             string name;
             cout << "Enter name: ";

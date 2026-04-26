@@ -197,7 +197,6 @@ int main() {
     vector<int> target_list;
     while (true) {
         int target = rand() % 5;
-        cout << target << endl;
         target_list.push_back(target);
         for (int value: target_list){ LED_Flash(value); }
 
@@ -230,8 +229,6 @@ int main() {
             cout << "Enter name: ";
             cin >> name;
 
-            //temp 
-            avgAttention = 5;
             // we can replace cout with a push to the website or smt
             cout << "NAME: " << name << "\nSCORE: " << score << "\nAverage focus: " << avgAttention << endl;
             

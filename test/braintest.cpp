@@ -60,12 +60,12 @@ int openSerial(const char* device, speed_t baudrate) {
 int main() {
     const char* serialDevice = "/dev/serial0";  // Pi 3 primary UART
 
-    int serialFd = openSerial(serialDevice, B57600);
+    int serialFd = openSerial(serialDevice, B9600);
     if (serialFd < 0) {
         return 1;
     }
 
-    std::cout << "Listening for EEG data on " << serialDevice << " at 57600 baud..." << std::endl;
+    std::cout << "Listening for EEG data on " << serialDevice << " at 9600 baud..." << std::endl;
     std::cout << "Press Ctrl+C to stop.\n" << std::endl;
 
     Brain brain(serialFd);
@@ -77,7 +77,7 @@ int main() {
             std::cout.flush();
         }
 
-        usleep(1000);
+        usleep(200);
     }
 
     close(serialFd);

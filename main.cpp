@@ -230,8 +230,6 @@ int main() {
             cout << "Enter name: ";
             cin >> name;
 
-            //temp 
-            avgAttention = 5;
             // we can replace cout with a push to the website or smt
             cout << "NAME: " << name << "\nSCORE: " << score << "\nAverage focus: " << avgAttention << endl;
             

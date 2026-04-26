@@ -181,7 +181,7 @@ int main() {
     lcdInit();
 
     // open serial at Baudrate 9600
-    int serialFd = openSerial(SER_DEV, B9600);
+    int serialFd = openSerial(SER_DEV, B57600);
 
     Brain brain(serialFd);
     thread brainThread(brainCollector, &brain);

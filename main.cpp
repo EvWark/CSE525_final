@@ -197,7 +197,6 @@ int main() {
     vector<int> target_list;
     while (true) {
         int target = rand() % 5;
-        cout << target << endl;
         target_list.push_back(target);
         for (int value: target_list){ LED_Flash(value); }
 

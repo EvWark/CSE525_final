@@ -1,7 +1,6 @@
 /*
 Test code cobbled together just to test the brain.cpp
 */
-
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -12,7 +11,6 @@ Test code cobbled together just to test the brain.cpp
 
 #include "brain.hpp"
 
-// Open and configure a UART serial port on Raspberry Pi.
 int openSerial(const char* device, speed_t baudrate) {
     int fd = open(device, O_RDWR | O_NOCTTY | O_SYNC);
     if (fd < 0) {
@@ -31,7 +29,6 @@ int openSerial(const char* device, speed_t baudrate) {
     cfsetispeed(&options, baudrate);
     cfsetospeed(&options, baudrate);
 
-    // 8N1, no flow control, raw mode
     options.c_cflag |= (CLOCAL | CREAD);
     options.c_cflag &= ~PARENB;
     options.c_cflag &= ~CSTOPB;
@@ -58,7 +55,7 @@ int openSerial(const char* device, speed_t baudrate) {
 }
 
 int main() {
-    const char* serialDevice = "/dev/serial0";  // Pi 3 primary UART
+    const char* serialDevice = "/dev/serial0";  
 
     int serialFd = openSerial(serialDevice, B9600);
     if (serialFd < 0) {
@@ -72,7 +69,6 @@ int main() {
 
     while (true) {
         if (brain.update()) {
-            // Print the full parsed packet as CSV.
             std::cout << brain.readCSV() << std::endl;
             std::cout.flush();
         }

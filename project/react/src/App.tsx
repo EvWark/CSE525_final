@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, use } from 'react'
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
@@ -9,22 +9,21 @@ interface Player {
   id: number
   name: string
   score: number
+  attention: number
 }
 
 function App() {
-  const [playerName, setPlayerName] = useState('')
+  //const [playerName, setPlayerName] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [gamemode, setGamemode] = useState('easy')
-  const [isActive, setIsActive] = useState(false)
+  //const [gamemode, setGamemode] = useState('easy')
+  //const [isActive, setIsActive] = useState(false)
   const [players, setPlayers] = useState<Player[]>([])
+  const [result, setResult] = useState<Player | null>(null)
 
   const handleSearch = async (e : React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     try {
-      const trimmedSearch = searchTerm.trim()
-      const response = await axios.get('/api/players/', {
-        params: { name: trimmedSearch },
-      })
+      const response = await axios.get(`/api/players/?name=${searchTerm}`)
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       console.log('Fetched players:', data)
       setPlayers(data)
@@ -33,20 +32,30 @@ function App() {
     }
   }
 
-  const handleGameStart = (e : React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+  const socket = new WebSocket('ws://127.0.0.1:8000/ws/game/default/')
+  socket.addEventListener('message', (event) => {
+    const data = JSON.parse(event.data)
+    console.log('Received WebSocket message:', data)
+    setResult(data)
+  })})
+  
+
+  /*const handleGameStart = (e : React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsActive(true)
-    axios.post('/api/players/', { name: playerName, score: 0 })
+    axios.post('/api/players/', { name: playerName, score: 0 , attention: 0 })
       .then(response => {
         console.log('Player created:', response.data)
       })
       .catch(error => {
         console.error('Error creating player:', error)
       })
-  }
+  }*/
 
   return (
     <>
+    {/* I don't think we need this atm, idk why I even wrote this in
     <Card>
       <Card.Body>
         <Card.Title>Game Settings</Card.Title>
@@ -77,8 +86,18 @@ function App() {
         </Form>
       </Card.Body>
     </Card>
-    
-    <Card>
+    */}
+    {result && (
+      <Card>
+        <Card.Body>
+          <Card.Title>Real-time Update</Card.Title>
+          <p>Name: {result.name}</p>
+          <p>Score: {result.score}</p>
+          <p>Attention: {result.attention}</p>
+        </Card.Body>
+      </Card>
+    )}
+    <Card> 
       <Card.Body>
         <Card.Title>Player Search</Card.Title>
         <Form onSubmit={handleSearch}>
@@ -90,12 +109,13 @@ function App() {
             Search
           </Button>
         </Form>
+        <br></br>
         {players.length > 0 && (
           <div>
             <h5>Search Results:</h5>
             <ul>
               {players.map(player => (
-                <li key={player.id}>{player.name} - Score: {player.score}</li>
+                <li key={player.id}>{player.name} - Score: {player.score} - Attention: {player.attention}</li>
               ))}
             </ul>
           </div>

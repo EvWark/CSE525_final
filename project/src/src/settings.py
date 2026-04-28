@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'game',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,15 @@ ROOT_URLCONF = 'src.urls'
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 CORS_ALLOW_ALL_ORIGINS = True
+ASGI_APPLICATION = 'src.asgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    }
+}
 
 TEMPLATES = [
     {

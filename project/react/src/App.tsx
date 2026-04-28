@@ -90,7 +90,7 @@ function App() {
     {result && (
       <Card>
         <Card.Body>
-          <Card.Title>Real-time Update</Card.Title>
+          <Card.Title>Results</Card.Title>
           <p>Name: {result.name}</p>
           <p>Score: {result.score}</p>
           <p>Attention: {result.attention}</p>

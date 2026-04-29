@@ -51,26 +51,33 @@ void brainCollector(Brain* brain){
     }
 }
 
+// opens the serial connection
 int openSerial(const char* device, int baudrate) {
+    // opens serial deivce
+    // opens for R/W, does not make program terminal controling terminal, non-blockling open
     int fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
 
+    // pulls currently terminal settings
     termios options;
     tcgetattr(fd, &options);
 
+    // sets input and output baudrate
     cfsetispeed(&options, baudrate);
     cfsetospeed(&options, baudrate);
 
-    options.c_cflag |= (CLOCAL | CREAD);
-    options.c_cflag &= ~PARENB;
-    options.c_cflag &= ~CSTOPB;
-    options.c_cflag &= ~CSIZE;
-    options.c_cflag |= CS8;
+    // sets control flags and serial mode
+    options.c_cflag |= (CLOCAL | CREAD); // ignores modern control lines, enable receiver
+    options.c_cflag &= ~PARENB; // turns off parity bit checking
+    options.c_cflag &= ~CSTOPB; // clears 2 bit mode if set, default is 1 stop bit
+    options.c_cflag &= ~CSIZE; // removes current data bit setting
+    options.c_cflag |= CS8; // sets 8 data bit mode
 
-    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-    options.c_iflag &= ~(IXON | IXOFF | IXANY);
-    options.c_oflag &= ~OPOST;
+    // sets local modes
+    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // configures binary serial mode
+    options.c_iflag &= ~(IXON | IXOFF | IXANY); // disables control flow for output
+    options.c_oflag &= ~OPOST; // disables any output processing
 
-    tcsetattr(fd, TCSANOW, &options);
+    tcsetattr(fd, TCSANOW, &options); // writes back to serial device immediately 
 
     return fd;
 }
@@ -241,7 +248,7 @@ int main() {
             brainThread.join();
             // averages out attention values
             double avgAttention = 0;
-            for (const BrainSample& bs: samples){ vgAttention += bs.attention; 
+            for (const BrainSample& bs: samples){ vgAttention += bs.attention; }
             avgAttention /= samples.size();
             
             // asks for users name

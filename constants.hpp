@@ -18,7 +18,9 @@ int ledPins[5]    = {14, 2, 12, 25, 1}; // LED pins
 #define SER_DEV "/dev/serial0"
 
 // LCD control bytes
-#define FUNCTION_SET 0x28 // 4 bit mode, 2 display lines, regular character font
+#define BIT_MODE_8 0x33
+#define BIT_MODE_4 0x32 // 4 bit 
+#define FUNCTION_SET 0
 #define DISPLAY_CONTROL 0x0C // Turns on display, cursor is not displayed, character does not blink
 #define LCD_BACKLIGHT 0x08
 #define ENTRY_MODE 0x06

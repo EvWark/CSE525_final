@@ -18,9 +18,11 @@
 
 using namespace std;
 
+// global variables
 int lcd_fd;
 vector<BrainSample> samples;
 atomic<bool> brainRunning(true);
+int score = 0;
 
 // this checks if there is a update from serial
 void brainCollector(Brain* brain){
@@ -73,10 +75,12 @@ int openSerial(const char* device, int baudrate) {
     return fd;
 }
 
+// writes out to linux via system call
 void lcdWriteByte(int data) {
     write(lcd_fd, &data, 1);
 }
 
+// LCD only reads data when enable pin flashs high to low, this writes it out
 void lcdPulseEnable(int data) {
     lcdWriteByte(data | ENABLE);
     usleep(500);
@@ -84,17 +88,22 @@ void lcdPulseEnable(int data) {
     usleep(500);
 }
 
+/*
 void lcdSend4bits(int data) {
     lcdWriteByte(data);
     lcdPulseEnable(data);
-}
+}*/
 
+// sends data to I2C chip
+// has to break values into 2 chuncks when sending them
 void lcdSend(int value, int mode) {
     int high = mode | (value & 0xF0) | LCD_BACKLIGHT;
     int low  = mode | ((value << 4) & 0xF0) | LCD_BACKLIGHT;
 
+    // writes high bytes
     lcdWriteByte(high);
     lcdPulseEnable(high);
+    /// writes low bytes
     lcdWriteByte(low);
     lcdPulseEnable(low);
 }
@@ -118,17 +127,15 @@ void lcdPrint(const string &s, int cursor, bool LCDclear) {
     for (char c : s) { lcdSend(c, RS); } 
 }
 
-int score = 0;
-
 void lcdShowScore() {
     lcdPrint("SCORE:", 0, true); // clears screen, write SCORE to line 0
     lcdPrint(to_string(score), 1, false); // writes score to line 1
 }
 
 void LED_Flash(int target){
-    digitalWrite(ledPins[target], HIGH);
+    digitalWrite(ledPins[target], HIGH); // flashes LED to high for 400 miliseconds
     delay(400);
-    digitalWrite(ledPins[target], LOW);
+    digitalWrite(ledPins[target], LOW);  // flashes LED to low for 100 miliseconds
     delay(100);
     return;
 }
@@ -194,28 +201,31 @@ int main() {
     // this might not be necessary but it splits off a thread to handle serial in
     thread brainThread(brainCollector, &brain); 
     
-    lcdPrint("Press the", 0, true);
-    lcdPrint("start button", 1, false);
-    cout << "Waiting for start button" << endl;
-    while (digitalRead(CONFIRM_BUTTON) == HIGH);
-    // displays score
-    lcdShowScore();
+
+    lcdPrint("Press the", 0, true); // Clears screen, writes to first line
+    lcdPrint("start button", 1, false); // writes to second line
+    cout << "Waiting for start button" << endl; // writes out consol to press start button
+    while (digitalRead(CONFIRM_BUTTON) == HIGH); // waits for start
+    lcdShowScore(); // displays score
 
     // Game Loop
     vector<int> target_list;
+    vector<int> input_list; 
     while (true) {
-        int target = rand() % 5;
-        target_list.push_back(target);
-        for (int value: target_list){ LED_Flash(value); }
+        // picking random LED code
+        int target = rand() % 5; // generates random number
+        target_list.push_back(target); // adds it to target vector
+        for (int value: target_list){ LED_Flash(value); } // flashes LED
 
-        vector<int> input_list;
-        input_list.clear();
+        // pull in user input
+        input_list.clear(); // clears input list
         for (int i: target_list){
-            int input = waitForButton();
-            input_list.push_back(input);
-            LED_Flash(input);
+            int input = waitForButton(); // waits until input
+            input_list.push_back(input); // push input onto vector
+            LED_Flash(input); // flashes corresponding LED
         }
         
+        // checks for victory condition
         if (input_list == target_list) {
             score++;
             lcdShowScore();            

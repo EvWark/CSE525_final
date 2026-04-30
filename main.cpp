@@ -262,7 +262,7 @@ int main() {
             
             // writes curl command to send out
             string cmd =
-            "curl -X POST http://127.0.0.1:8000/players/ "
+            "curl -X POST http://127.0.0.1:8000/api/players/ "
             "-H 'Content-Type: application/json' "
             "-d '{\"name\":\"" + name + "\","
             "\"score\":" + to_string(score) + ","

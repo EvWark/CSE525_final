@@ -248,7 +248,7 @@ int main() {
             brainThread.join();
             // averages out attention values
             double avgAttention = 0;
-            for (const BrainSample& bs: samples){ vgAttention += bs.attention; }
+            for (const BrainSample& bs: samples){ avgAttention += bs.attention; }
             avgAttention /= samples.size();
             
             // asks for users name

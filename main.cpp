@@ -116,8 +116,9 @@ void lcdSend(int value, int mode) {
 }
 
 // commmand bytes for the HD44780
+// necessary to switch to 8 bit mode before switching to 4 bit mode
 void lcdInit() {
-    //lcdSend(BIT_MODE_8, 0); // sets 8 bit mode before switching to 4 bit mode
+    lcdSend(BIT_MODE_8, 0); // sets 8 bit mode before switching to 4 bit mode
     lcdSend(BIT_MODE_4, 0); // 4 bit mode
     lcdSend(FUNCTION_SET, 0); // Function Set
     lcdSend(DISPLAY_CONTROL, 0); // Display On/Off Control

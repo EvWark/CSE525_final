@@ -259,9 +259,14 @@ int main() {
 
             // we can replace cout with a push to the website or smt
             cout << "NAME: " << name << "\nSCORE: " << score << "\nAverage focus: " << avgAttention << endl;
-            
+            string cmd = 
+            "echo '{\"name\":\"" + name + "\","
+            "\"score\":" + to_string(score) + ","
+            "\"attention\":" + to_string(avgAttention) + "}'"
+            " | websocat -n1 ws://127.0.0.1:8000/ws/game/default/";
+            system(cmd.c_str());
             // writes curl command to send out
-            string cmd =
+            cmd =
             "curl -X POST http://127.0.0.1:8000/api/players/ "
             "-H 'Content-Type: application/json' "
             "-d '{\"name\":\"" + name + "\","
